@@ -16,7 +16,11 @@ LANGUAGE
 ANDROID PERMISSIONS CONFIGURED
   - USER-PERMISSION android.permission.ACCESS_COARSE_LOCATION
   - USER-PERMISSION android.permission.INTERNET
-  
+
+API:
+https://api.data.gov.sg/
+ENDPOINT:
+v1/environment/2-hour-weather-forecast/
 
 Highlight
 
