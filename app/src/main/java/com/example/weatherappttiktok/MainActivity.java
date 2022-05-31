@@ -27,7 +27,6 @@ import com.example.weatherappttiktok.Model.Forecast.MyForecast;
 import com.example.weatherappttiktok.Utils.MyUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -50,17 +49,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     double myLat = 0;
     double myLong = 0;
-    boolean filtered = false;
 
     List<Forecast> forecasts;
     List<AreaMetadata> areaMetadata;
-    List<Forecast> filteredForecasts = new ArrayList<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -76,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         mainWeather = findViewById(R.id.mainWeather);
         mainIcon = findViewById(R.id.mainIcon);
         recyclerView = findViewById(R.id.recView);
-        searchView = findViewById(R.id.edtSearch);
 
         swipeRefreshLayout = findViewById(R.id.refreshLayout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -85,9 +82,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             swipeRefreshLayout.setRefreshing(false);
         });
 
-        getLocation();
-        callApi();
-
+        searchView = findViewById(R.id.edtSearch);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
@@ -98,12 +93,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             @Override
             public boolean onQueryTextChange(String text) {
                 forecastAdapter.getFilter().filter(text);
-                filtered = true;
                 return false;
             }
 
         });
 
+        getLocation();
+        callApi();
 
     }
 
@@ -114,10 +110,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     public void callApi() {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         Date today = Calendar.getInstance().getTime();
         String currentTime = dateFormat.format(today);
-
+        Log.d("today", currentTime + "");
         ApiService.apiService.getForecast(currentTime).enqueue(new Callback<MyForecast>() {
             @Override
             public void onResponse(@NonNull Call<MyForecast> call, @NonNull Response<MyForecast> response) {
@@ -147,14 +143,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             String mainAreaName;
             String mainAreaForecast;
 
-            filteredForecasts = forecastList;
-            if(filtered){
-                mainAreaName = filteredForecasts.get(pos).getArea();
-                mainAreaForecast  = filteredForecasts.get(pos).getForecast();
-            }else {
-                mainAreaName = forecasts.get(pos).getArea();
-                mainAreaForecast = forecasts.get(pos).getForecast();
-            }
+            mainAreaName = forecasts.get(pos).getArea();
+            mainAreaForecast = forecasts.get(pos).getForecast();
 
             mainArea.setText(mainAreaName);
             mainWeather.setText(mainAreaForecast);
@@ -174,9 +164,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         int nearestIndex = 0;
 
         for (int i = 0; i < areaMetadata.size(); i++){
-            Log.d("Chi", calDistance(myLat, myLong,
-                    areaMetadata.get(i).getLabel_location().getLatitude(),
-                    areaMetadata.get(i).getLabel_location().getLongitude()) + "");
 
             if(calDistance(myLat, myLong,
                     areaMetadata.get(i).getLabel_location().getLatitude(),
